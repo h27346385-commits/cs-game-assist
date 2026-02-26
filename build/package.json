@@ -1,0 +1,19 @@
+{
+  "name": "cs-game-assist",
+  "productName": "CS游戏助手",
+  "description": "CS2游戏数据分析与视频集锦生成工具",
+  "private": true,
+  "version": "1.0.0",
+  "author": "CS Game Assist Team",
+  "main": "dist-electron/main.cjs",
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "lucide-react": "^0.575.0",
+    "pg": "^8.19.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-is": "^19.2.0",
+    "react-router-dom": "^7.13.1",
+    "recharts": "^3.7.0"
+  }
+}
