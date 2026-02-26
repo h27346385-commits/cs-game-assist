@@ -153,3 +153,10 @@ MIT License - 详见 LICENSE 文件
 - [HLAE](https://advancedfx.org/) - CS2 录制工具
 - [CSDA](https://github.com/esportal/csgodemoapi) - Demo 解析
 - [FFmpeg](https://ffmpeg.org/) - 视频处理
+
+
+## ����״̬
+
+![Build and Test](https://github.com/h27346385-commits/cs-game-assist/actions/workflows/build.yml/badge.svg)
+![Release](https://github.com/h27346385-commits/cs-game-assist/actions/workflows/release.yml/badge.svg)
+
