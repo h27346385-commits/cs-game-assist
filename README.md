@@ -160,3 +160,41 @@ MIT License - 璇﹁ LICENSE 鏂囦欢
 ![Build and Test](https://github.com/h27346385-commits/cs-game-assist/actions/workflows/build.yml/badge.svg)
 ![Release](https://github.com/h27346385-commits/cs-game-assist/actions/workflows/release.yml/badge.svg)
 
+
+## 快速开始
+
+```bash
+# 安装依赖
+npm install
+
+# 开发模式
+npm run dev
+
+# 构建
+npm run build
+
+# 构建Electron应用
+npm run electron:build
+```
+
+## 项目结构
+
+```
+cs-game-assist/
+├── .github/          # GitHub配置
+│   ├── workflows/    # CI/CD工作流
+│   ├── ISSUE_TEMPLATE/
+│   └── ...
+├── electron/         # Electron主进程
+├── src/              # React前端代码
+├── build/            # 构建配置
+└── resources/        # 静态资源
+```
+
+## 贡献
+
+请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解如何参与贡献。
+
+## 许可证
+
+本项目采用 [MIT](LICENSE) 许可证。
