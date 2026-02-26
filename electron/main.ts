@@ -1,84 +1,85 @@
-// 最先执行的代码
-const fs = require('fs');
-const path = require('path');
-const logDir = path.join('K:\\kimi_code', 'logs');
-try { fs.mkdirSync(logDir, { recursive: true }); } catch (e) {}
-const logFile = path.join(logDir, `app-${Date.now()}.log`);
-fs.writeFileSync(logFile, `[${new Date().toISOString()}] [INFO] === CS游戏助手启动 ===\n`);
-fs.appendFileSync(logFile, `[${new Date().toISOString()}] [INFO] Step 0: 第一行代码\n`);
-
 /**
  * CS游戏助手 - 主进程入口
  */
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import * as path from 'path';
+import * as fs from 'fs';
 
-fs.appendFileSync(logFile, `[${new Date().toISOString()}] [INFO] Step 1: Electron 导入完成\n`);
-
+// 日志系统
+let logFile: string;
 function log(level: string, msg: string, ...args: any[]) {
-  const line = `[${new Date().toISOString()}] [${level}] ${msg} ${args.join(' ')}`;
+  const line = `[${new Date().toISOString()}] [${level}] ${msg} ${args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')}`;
   console.log(line);
-  try { fs.appendFileSync(logFile, line + '\n'); } catch (e) {}
+  if (logFile) {
+    try { fs.appendFileSync(logFile, line + '\n'); } catch (e) {}
+  }
 }
 
-log('INFO', 'Step 2: 日志函数定义完成');
+// 初始化日志路径
+try {
+  const logDir = path.join(app.getPath('userData'), 'logs');
+  fs.mkdirSync(logDir, { recursive: true });
+  logFile = path.join(logDir, `app-${new Date().toISOString().split('T')[0]}.log`);
+} catch (e) {
+  logFile = path.join(process.env.TEMP || 'C:\\temp', 'cs-game-assist.log');
+}
 
-// 延迟加载模块
+log('INFO', '==========================================');
+log('INFO', 'CS游戏助手 v' + app.getVersion() + ' 启动');
+log('INFO', '==========================================');
+
+// 服务模块
 let databaseManager: any;
 let demoParser: any;
 let videoGenerator: any;
 
 async function loadModules() {
-  log('INFO', 'Step 2: 加载模块');
   try {
+    log('INFO', '加载模块...');
     const dbModule = require('./database.cjs');
     databaseManager = dbModule.default || dbModule;
-    log('INFO', '  database 加载成功');
-  } catch (e: any) {
-    log('ERROR', '  database 失败:', e.message);
-  }
-  
-  try {
     const demoModule = require('./demo-parser.cjs');
     demoParser = demoModule.default || demoModule;
-    log('INFO', '  demo-parser 加载成功');
-  } catch (e: any) {
-    log('ERROR', '  demo-parser 失败:', e.message);
-  }
-  
-  try {
     const videoModule = require('./video-generator.cjs');
     videoGenerator = videoModule.default || videoModule;
-    log('INFO', '  video-generator 加载成功');
-  } catch (e: any) {
-    log('ERROR', '  video-generator 失败:', e.message);
+    log('INFO', '模块加载成功');
+  } catch (error: any) {
+    log('ERROR', '模块加载失败:', error.message);
   }
 }
 
 let mainWindow: BrowserWindow | null = null;
 
 async function createWindow() {
-  log('INFO', 'Step 3: 创建窗口');
+  log('INFO', '创建窗口...');
   
-  try {
-    const preloadPath = path.join(__dirname, 'preload.cjs');
-    log('INFO', '  Preload路径:', preloadPath);
-    
-    mainWindow = new BrowserWindow({
-      width: 1400,
-      height: 900,
-      title: 'CS游戏助手',
-      show: true,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        preload: preloadPath,
-      },
-    });
+  const preloadPath = path.join(__dirname, 'preload.cjs');
+  if (!fs.existsSync(preloadPath)) {
+    log('ERROR', 'Preload文件不存在:', preloadPath);
+    return;
+  }
 
-    log('INFO', '  窗口创建成功');
+  mainWindow = new BrowserWindow({
+    width: 1400,
+    height: 900,
+    minWidth: 1200,
+    minHeight: 700,
+    title: 'CS游戏助手',
+    show: true,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: preloadPath,
+    },
+  });
 
-    // 加载页面
+  // 加载页面
+  const isPackaged = app.isPackaged;
+  if (!isPackaged) {
+    await mainWindow.loadURL('http://localhost:5173');
+    mainWindow.webContents.openDevTools();
+  } else {
     const possiblePaths = [
       path.join(__dirname, '../dist/index.html'),
       path.join(__dirname, '../../dist/index.html'),
@@ -87,7 +88,6 @@ async function createWindow() {
     let loaded = false;
     for (const htmlPath of possiblePaths) {
       if (fs.existsSync(htmlPath)) {
-        log('INFO', '  加载:', htmlPath);
         await mainWindow.loadFile(htmlPath);
         loaded = true;
         break;
@@ -95,34 +95,26 @@ async function createWindow() {
     }
 
     if (!loaded) {
-      log('ERROR', '  找不到 index.html');
-      await mainWindow.loadURL('data:text/html,<h1>错误</h1>');
-    } else {
-      log('INFO', '  页面加载成功');
+      mainWindow.loadURL('data:text/html,<h1>错误</h1><p>找不到应用程序文件</p>');
     }
-
-    mainWindow.on('closed', () => {
-      log('INFO', '窗口关闭');
-      mainWindow = null;
-    });
-
-  } catch (e: any) {
-    log('ERROR', '创建窗口失败:', e.message);
-    log('ERROR', e.stack);
   }
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 }
 
+// IPC
 function registerIpc() {
-  log('INFO', 'Step 4: 注册IPC');
   ipcMain.handle('get-app-version', () => app.getVersion());
   ipcMain.handle('db-status', () => ({ initialized: !!databaseManager }));
+  ipcMain.handle('get-matches', () => databaseManager ? databaseManager.getMatches() : []);
+  ipcMain.handle('db-stats', () => databaseManager ? databaseManager.getStats() : { success: false });
 }
 
 // 应用生命周期
-log('INFO', 'Step 5: 等待 app ready');
-fs.appendFileSync(logFile, `[${new Date().toISOString()}] [INFO] Step 5a: about to call whenReady\n`);
 app.whenReady().then(async () => {
-  fs.appendFileSync(logFile, `[${new Date().toISOString()}] [INFO] Step 6: app ready\n`);
+  log('INFO', 'Electron 就绪');
   
   await loadModules();
   registerIpc();
@@ -137,11 +129,16 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', () => {
   log('INFO', '所有窗口关闭');
-  app.quit();
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
+// 错误处理
 process.on('uncaughtException', (error) => {
   log('ERROR', '未捕获异常:', error.message);
 });
 
-log('INFO', 'Step 7: main.ts 加载完成');
+process.on('unhandledRejection', (reason) => {
+  log('ERROR', '未处理拒绝:', reason);
+});

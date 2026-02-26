@@ -198,8 +198,8 @@ class DemoParser {
     // 尝试从文件名解析地图和分数
     // 常见格式: match730_003..._de_dust2.dem 或 auto-20240101-de_inferno.dem
     let mapName = 'unknown';
-    let scoreA = 0;
-    let scoreB = 0;
+    const scoreA = 0;
+    const scoreB = 0;
 
     const mapMatch = fileName.match(/de_[a-z0-9_]+/);
     if (mapMatch) {
