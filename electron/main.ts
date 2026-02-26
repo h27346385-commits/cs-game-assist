@@ -18,11 +18,14 @@ function log(level: string, msg: string, ...args: any[]) {
 
 // 初始化日志路径
 try {
-  const logDir = path.join(app.getPath('userData'), 'logs');
+  const userDataPath = app.getPath('userData');
+  const logDir = path.join(userDataPath, 'logs');
   fs.mkdirSync(logDir, { recursive: true });
   logFile = path.join(logDir, `app-${new Date().toISOString().split('T')[0]}.log`);
-} catch (e) {
+  fs.appendFileSync(logFile, `[${new Date().toISOString()}] [INFO] 日志初始化成功: ${logFile}\n`);
+} catch (e: any) {
   logFile = path.join(process.env.TEMP || 'C:\\temp', 'cs-game-assist.log');
+  fs.appendFileSync(logFile, `[${new Date().toISOString()}] [WARN] 使用备用日志路径: ${e.message}\n`);
 }
 
 log('INFO', '==========================================');

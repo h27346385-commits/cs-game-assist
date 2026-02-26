@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Layout } from './components/Layout';
+import { Home } from './pages/Home';
 import { Profile } from './pages/Profile';
 import { Stats } from './pages/Stats';
 import { Heatmap } from './pages/Heatmap';
@@ -10,10 +11,12 @@ import { Highlights } from './pages/Highlights';
 import { Generating } from './pages/Generating';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState('home');
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'home':
+        return <Home />;
       case 'profile':
         return <Profile />;
       case 'stats':

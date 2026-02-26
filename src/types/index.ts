@@ -126,6 +126,22 @@ export interface Round {
   highlightType?: '3k' | '4k' | 'ace' | 'clutch' | 'knife' | 'noscope';
 }
 
+// 高光时刻
+export interface Highlight {
+  id?: number;
+  match_id: string;
+  type: 'ace' | 'quadra' | 'clutch_1v3' | 'clutch_1v4' | 'clutch_1v5' | 'deagle' | 'awp_triple';
+  player_name: string;
+  player_steam_id?: string;
+  round_number: number;
+  start_tick: number;
+  end_tick: number;
+  description: string;
+  video_path?: string;
+  thumbnail_path?: string;
+  created_at?: string;
+}
+
 // 视频片段
 export interface VideoClip {
   id: string;
@@ -137,6 +153,36 @@ export interface VideoClip {
   kills: number;
   createdAt: string;
   filePath?: string;
+}
+
+// 视频模板
+export interface VideoTemplate {
+  id: string;
+  name: string;
+  description: string;
+  resolution: { width: number; height: number };
+  fps: number;
+  bitrate: string;
+  hasTransitions: boolean;
+  hasEffects: boolean;
+  hasMusic: boolean;
+  thumbnail: string;
+}
+
+// 视频任务
+export interface VideoTask {
+  id: string;
+  highlightId: number;
+  demoPath: string;
+  startTick: number;
+  endTick: number;
+  template: string;
+  outputPath?: string;
+  status: 'pending' | 'processing' | 'completed' | 'error';
+  progress: number;
+  error?: string;
+  createdAt: string;
+  completedAt?: string;
 }
 
 // 皮肤
