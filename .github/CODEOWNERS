@@ -1,0 +1,8 @@
+﻿# 全局代码所有者
+* @h27346385-commits
+
+# GitHub Actions工作流
+.github/workflows/ @h27346385-commits
+
+# 文档
+*.md @h27346385-commits
